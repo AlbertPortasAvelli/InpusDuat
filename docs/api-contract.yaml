@@ -1,0 +1,1246 @@
+openapi: 3.0.3
+info:
+  title: Inpu's Duat API
+  description: |
+    Personal lost-media rescue platform for Catalan content.
+    REST API with JWT authentication and role-based access control.
+  version: 1.0.0
+  contact:
+    name: Inpu's Duat
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://inpusduat.azurewebsites.net
+    description: Production (Azure)
+
+tags:
+  - name: auth
+    description: Registration, login, token refresh and logout
+  - name: media
+    description: Series and movies catalogue management
+  - name: seasons
+    description: Seasons belonging to a media entry
+  - name: episodes
+    description: Episodes belonging to a season
+  - name: search
+    description: Full-text and filtered search via Elasticsearch
+  - name: user-media
+    description: Personal tracking — status, rating and notes per title
+  - name: users
+    description: User management (admin only)
+
+# ─────────────────────────────────────────────
+# SECURITY
+# ─────────────────────────────────────────────
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  # ── SHARED SCHEMAS ──
+  schemas:
+
+    # Auth
+    RegisterRequest:
+      type: object
+      required: [username, email, password]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          example: joan_puig
+        email:
+          type: string
+          format: email
+          example: joan@example.com
+        password:
+          type: string
+          minLength: 8
+          example: secretPassword123
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: joan@example.com
+        password:
+          type: string
+          example: secretPassword123
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiJ9...
+        refreshToken:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          description: Access token expiry in seconds
+          example: 900
+
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+
+    # Users
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        username:
+          type: string
+          example: joan_puig
+        email:
+          type: string
+          example: joan@example.com
+        role:
+          type: string
+          enum: [ADMIN, USER]
+          example: USER
+        active:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: 2024-05-01T10:00:00Z
+
+    # Media
+    MediaRequest:
+      type: object
+      required: [title, type]
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          example: Plats bruts
+        originalTitle:
+          type: string
+          maxLength: 255
+          example: Plats bruts
+        type:
+          type: string
+          enum: [SERIES, MOVIE]
+          example: SERIES
+        genre:
+          type: string
+          maxLength: 100
+          example: Comedy
+        language:
+          type: string
+          maxLength: 50
+          example: Catalan
+        releaseYear:
+          type: integer
+          minimum: 1888
+          maximum: 2100
+          example: 1999
+        synopsis:
+          type: string
+          example: Sèrie de comèdia catalana sobre dos amics que comparteixen pis.
+        posterUrl:
+          type: string
+          format: uri
+          maxLength: 500
+          example: https://example.com/posters/plats-bruts.jpg
+
+    MediaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        title:
+          type: string
+          example: Plats bruts
+        originalTitle:
+          type: string
+          example: Plats bruts
+        type:
+          type: string
+          enum: [SERIES, MOVIE]
+          example: SERIES
+        genre:
+          type: string
+          example: Comedy
+        language:
+          type: string
+          example: Catalan
+        releaseYear:
+          type: integer
+          example: 1999
+        synopsis:
+          type: string
+          example: Sèrie de comèdia catalana sobre dos amics que comparteixen pis.
+        posterUrl:
+          type: string
+          example: https://example.com/posters/plats-bruts.jpg
+        createdBy:
+          type: integer
+          format: int64
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          example: 2024-05-01T10:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2024-05-01T10:00:00Z
+
+    MediaPageResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/MediaResponse'
+        page:
+          type: integer
+          example: 0
+        size:
+          type: integer
+          example: 20
+        totalElements:
+          type: integer
+          format: int64
+          example: 142
+        totalPages:
+          type: integer
+          example: 8
+        last:
+          type: boolean
+          example: false
+
+    # Seasons
+    SeasonRequest:
+      type: object
+      required: [seasonNumber]
+      properties:
+        seasonNumber:
+          type: integer
+          minimum: 1
+          example: 1
+        title:
+          type: string
+          example: Temporada 1
+        episodeCount:
+          type: integer
+          example: 13
+        releaseYear:
+          type: integer
+          example: 1999
+
+    SeasonResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        mediaId:
+          type: integer
+          format: int64
+          example: 1
+        seasonNumber:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Temporada 1
+        episodeCount:
+          type: integer
+          example: 13
+        releaseYear:
+          type: integer
+          example: 1999
+
+    # Episodes
+    EpisodeRequest:
+      type: object
+      required: [episodeNumber, title]
+      properties:
+        episodeNumber:
+          type: integer
+          minimum: 1
+          example: 1
+        title:
+          type: string
+          maxLength: 255
+          example: El primer dia
+        durationMinutes:
+          type: integer
+          example: 28
+        synopsis:
+          type: string
+          example: En Ramon i en Manel es coneixen per primera vegada.
+
+    EpisodeResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        seasonId:
+          type: integer
+          format: int64
+          example: 1
+        episodeNumber:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: El primer dia
+        durationMinutes:
+          type: integer
+          example: 28
+        synopsis:
+          type: string
+          example: En Ramon i en Manel es coneixen per primera vegada.
+
+    # User media tracking
+    UserMediaRequest:
+      type: object
+      required: [mediaId, status]
+      properties:
+        mediaId:
+          type: integer
+          format: int64
+          example: 1
+        status:
+          type: string
+          enum: [WATCHED, WATCHING, PENDING]
+          example: WATCHING
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 10
+          nullable: true
+          example: 9
+        watchedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: 2024-05-10T20:30:00Z
+        notes:
+          type: string
+          nullable: true
+          example: Molt bona sèrie, recomanada.
+
+    UserMediaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        userId:
+          type: integer
+          format: int64
+          example: 1
+        media:
+          $ref: '#/components/schemas/MediaResponse'
+        status:
+          type: string
+          enum: [WATCHED, WATCHING, PENDING]
+          example: WATCHING
+        rating:
+          type: integer
+          nullable: true
+          example: 9
+        watchedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: 2024-05-10T20:30:00Z
+        notes:
+          type: string
+          nullable: true
+          example: Molt bona sèrie, recomanada.
+
+    # Search
+    SearchResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/MediaResponse'
+        query:
+          type: string
+          example: plats bruts
+        totalHits:
+          type: integer
+          format: int64
+          example: 3
+        page:
+          type: integer
+          example: 0
+        size:
+          type: integer
+          example: 20
+
+    # Errors
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: 2024-05-01T10:00:00Z
+        status:
+          type: integer
+          example: 404
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: Media not found with id 99
+        path:
+          type: string
+          example: /api/v1/media/99
+        correlationId:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          type: string
+          example: Validation failed
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            title: must not be blank
+            type: must be SERIES or MOVIE
+
+  # ── SHARED RESPONSES ──
+  responses:
+    Unauthorized:
+      description: Missing or invalid JWT token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 401
+            error: Unauthorized
+            message: JWT token is missing or invalid
+
+    Forbidden:
+      description: Authenticated but insufficient role
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 403
+            error: Forbidden
+            message: Access denied — ADMIN role required
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    BadRequest:
+      description: Invalid input data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+
+# ─────────────────────────────────────────────
+# PATHS
+# ─────────────────────────────────────────────
+paths:
+
+  # ── AUTH ──
+  /api/v1/auth/register:
+    post:
+      tags: [auth]
+      summary: Register a new user
+      description: Creates a new USER account. Returns JWT tokens on success.
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email or username already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 409
+                error: Conflict
+                message: Email already registered
+
+  /api/v1/auth/login:
+    post:
+      tags: [auth]
+      summary: Login with email and password
+      description: Returns a short-lived access token (15 min) and a refresh token (7 days).
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 401
+                error: Unauthorized
+                message: Invalid email or password
+
+  /api/v1/auth/refresh:
+    post:
+      tags: [auth]
+      summary: Refresh access token
+      description: Exchanges a valid refresh token for a new access token. The refresh token must not be revoked or expired.
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: New access token issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Refresh token invalid, expired or revoked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/logout:
+    post:
+      tags: [auth]
+      summary: Logout
+      description: Revokes the refresh token. The access token expires naturally after 15 minutes.
+      operationId: logout
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '204':
+          description: Logged out successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ── MEDIA ──
+  /api/v1/media:
+    get:
+      tags: [media]
+      summary: List all media (paginated)
+      operationId: listMedia
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: sort
+          in: query
+          schema:
+            type: string
+            example: releaseYear,desc
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [SERIES, MOVIE]
+        - name: language
+          in: query
+          schema:
+            type: string
+            example: Catalan
+      responses:
+        '200':
+          description: Paginated list of media
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaPageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [media]
+      summary: Create a new media entry
+      description: ADMIN only.
+      operationId: createMedia
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MediaRequest'
+      responses:
+        '201':
+          description: Media created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/media/{id}:
+    get:
+      tags: [media]
+      summary: Get a media entry by ID
+      operationId: getMedia
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Media found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [media]
+      summary: Update a media entry
+      description: ADMIN only. Replaces all fields.
+      operationId: updateMedia
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MediaRequest'
+      responses:
+        '200':
+          description: Media updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [media]
+      summary: Delete a media entry
+      description: ADMIN only. Also deletes associated seasons, episodes and user_media records (cascade).
+      operationId: deleteMedia
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Media deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── SEASONS ──
+  /api/v1/media/{mediaId}/seasons:
+    get:
+      tags: [seasons]
+      summary: List seasons for a media entry
+      operationId: listSeasons
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: List of seasons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SeasonResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags: [seasons]
+      summary: Add a season to a media entry
+      description: ADMIN only.
+      operationId: createSeason
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SeasonRequest'
+      responses:
+        '201':
+          description: Season created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── EPISODES ──
+  /api/v1/seasons/{seasonId}/episodes:
+    get:
+      tags: [episodes]
+      summary: List episodes for a season
+      operationId: listEpisodes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: seasonId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: List of episodes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EpisodeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags: [episodes]
+      summary: Add an episode to a season
+      description: ADMIN only.
+      operationId: createEpisode
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: seasonId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EpisodeRequest'
+      responses:
+        '201':
+          description: Episode created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpisodeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── SEARCH ──
+  /api/v1/media/search:
+    get:
+      tags: [search]
+      summary: Full-text and filtered search
+      description: |
+        Searches the Elasticsearch index. Supports full-text query across title,
+        original title and synopsis, combined with optional filters.
+        At least one of `q`, `genre`, `language`, `type` or `year` must be provided.
+      operationId: searchMedia
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          description: Full-text search query
+          schema:
+            type: string
+            example: plats bruts comèdia
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [SERIES, MOVIE]
+        - name: genre
+          in: query
+          schema:
+            type: string
+            example: Comedy
+        - name: language
+          in: query
+          schema:
+            type: string
+            example: Catalan
+        - name: year
+          in: query
+          description: Filter by exact release year
+          schema:
+            type: integer
+            example: 1999
+        - name: yearFrom
+          in: query
+          description: Filter by release year range start
+          schema:
+            type: integer
+            example: 1990
+        - name: yearTo
+          in: query
+          description: Filter by release year range end
+          schema:
+            type: integer
+            example: 2005
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          description: No search parameters provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ── USER MEDIA ──
+  /api/v1/user-media:
+    get:
+      tags: [user-media]
+      summary: Get current user tracking list
+      description: Returns all media tracked by the authenticated user.
+      operationId: getUserMedia
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [WATCHED, WATCHING, PENDING]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: User tracking list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserMediaResponse'
+                  totalElements:
+                    type: integer
+                  page:
+                    type: integer
+                  size:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [user-media]
+      summary: Add a media entry to tracking list
+      operationId: addUserMedia
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserMediaRequest'
+      responses:
+        '201':
+          description: Tracking entry created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserMediaResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Media not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Media already in tracking list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/user-media/{id}:
+    put:
+      tags: [user-media]
+      summary: Update tracking entry
+      description: Update status, rating or notes. Users can only update their own entries.
+      operationId: updateUserMedia
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserMediaRequest'
+      responses:
+        '200':
+          description: Tracking entry updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserMediaResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Cannot update another user entry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [user-media]
+      summary: Remove from tracking list
+      operationId: deleteUserMedia
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Removed from tracking list
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Cannot delete another user entry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── USERS ──
+  /api/v1/users:
+    get:
+      tags: [users]
+      summary: List all users
+      description: ADMIN only.
+      operationId: listUsers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Paginated user list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserResponse'
+                  totalElements:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/users/me:
+    get:
+      tags: [users]
+      summary: Get current user profile
+      operationId: getMe
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/users/{id}:
+    get:
+      tags: [users]
+      summary: Get user by ID
+      description: ADMIN only.
+      operationId: getUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [users]
+      summary: Deactivate a user
+      description: ADMIN only. Sets active = false, does not delete the record.
+      operationId: deactivateUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: User deactivated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── HEALTH ──
+  /actuator/health:
+    get:
+      tags: [auth]
+      summary: Application health check
+      description: Public endpoint. Returns UP or DOWN with component details.
+      operationId: health
+      responses:
+        '200':
+          description: Application is healthy
+          content:
+            application/json:
+              example:
+                status: UP
+                components:
+                  db:
+                    status: UP
+                  elasticsearch:
+                    status: UP
