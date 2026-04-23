@@ -3,7 +3,7 @@
 ## [Unreleased]
 
 ## 2026-04-23
-### Session 1 — 17:40 to 20:10 (2h 30min)
+### Session 1 — 17:40 to 19:49 (2h 09min)
 - Project setup with Spring Initializr (Spring Boot 3.4.1, Java 17)
 - VS Code configuration with Extension Pack for Java
 - Data model design: 6 tables defined and documented
@@ -26,3 +26,10 @@
 - ~45min on JAVA_HOME environment variable configuration on Windows
 - ~30min on PostgreSQL port conflict between local install and Docker
 
+### Session 2 — 19:49 to 20:22 (33min)
+- Fixed V3 migration file that was empty — added seasons and episodes tables
+- Created 6 JPA entities: User, Media, Season, Episode, UserMedia, RefreshToken
+- Application starts successfully with ddl-auto: validate
+- All entities validated against database schema
+
+### Phase 1 completed — total time: ~3h 22min
