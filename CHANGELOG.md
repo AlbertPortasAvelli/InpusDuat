@@ -2,6 +2,31 @@
 
 ## [Unreleased]
 
+## 2026-04-26
+### Session 3 — 13:00 to 17:30 (4h 30min)
+- Cloned repository on laptop and verified environment works correctly
+- Resolved Docker image download issue (network/authentication)
+- Configured GitHub Actions CI workflow with PostgreSQL service
+- Fixed mvnw executable permissions for Linux (GitHub Actions)
+- Created 6 JPA repositories: User, Media, Season, Episode, UserMedia, RefreshToken
+- Created custom exceptions: ResourceNotFoundException, DuplicateResourceException, UnauthorizedException
+- Created GlobalExceptionHandler with structured JSON error responses
+- Created DTOs: MediaRequest, MediaResponse, AuthResponse, LoginRequest, RegisterRequest, UserResponse
+- Created MediaService with full CRUD logic and structured logging
+- Created MediaController with 5 endpoints (GET list, GET by id, POST, PUT, DELETE)
+- Created SecurityConfig with stateless session and public routes
+- Configured SpringDoc OpenAPI — Swagger UI accessible at /swagger-ui.html
+- Added UserRepository tests (6 tests passing with PostgreSQL)
+- Added MediaService unit tests with Mockito (7 tests passing)
+- Verified full API flow via Swagger UI: POST, GET, 404 error handling
+- GitHub Actions passing on every push
+
+### Blocked / time lost
+- ~20min on @DataJpaTest trying to replace PostgreSQL with H2 — fixed with @AutoConfigureTestDatabase(replace = NONE)
+- ~15min on port conflict between local PostgreSQL and Docker on laptop
+
+### Phase 2 completed — total time: ~4h 30min
+
 ## 2026-04-23
 ### Session 1 — 17:40 to 19:49 (2h 09min)
 - Project setup with Spring Initializr (Spring Boot 3.4.1, Java 17)
