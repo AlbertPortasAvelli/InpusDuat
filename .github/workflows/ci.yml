@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ develop, main, 'feature/**' ]
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: inpusduat_test
+          POSTGRES_USER: inpusduat
+          POSTGRES_PASSWORD: inpusduat123
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and test
+        run: ./mvnw clean verify
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/inpusduat_test
+          SPRING_DATASOURCE_USERNAME: inpusduat
+          SPRING_DATASOURCE_PASSWORD: inpusduat123
+          SPRING_ELASTICSEARCH_URIS: http://localhost:9200
