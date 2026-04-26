@@ -42,7 +42,7 @@ public class MediaController {
     public ResponseEntity<MediaResponse> create(
             @Valid @RequestBody MediaRequest request) {
         // TODO: obtener userId del token JWT cuando implementemos seguridad
-        Long userId = 1L;
+        Long userId = 13L;
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(mediaService.create(request, userId));
     }
