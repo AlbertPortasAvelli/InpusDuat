@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/inpusduat_test
+    url: jdbc:postgresql://localhost:5433/inpusduat_test
     username: inpusduat
     password: inpusduat123
 
