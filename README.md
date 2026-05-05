@@ -8,8 +8,8 @@ Java 17 · Spring Boot 3.4.1 · PostgreSQL 15 · Elasticsearch 8 · Docker · Az
 
 ## Features
 - Full CRUD for series and movies with pagination
-- Advanced search powered by Elasticsearch
 - JWT authentication with role-based access control (ADMIN / USER)
+- Advanced search powered by Elasticsearch
 - Structured logging with correlation IDs
 - OpenAPI 3.0 documentation via Swagger UI
 - Containerized with Docker Compose
@@ -25,11 +25,17 @@ docker-compose up -d
 # Swagger UI at http://localhost:8080/swagger-ui.html
 ```
 
+## Authentication
+Register and login via:
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+Use the returned `accessToken` as `Bearer <token>` in the `Authorization` header for protected endpoints.
+
 ## Project status
 - ✅ Phase 0 — Setup
 - ✅ Phase 1 — Database schema and JPA entities
 - ✅ Phase 2 — REST API with CRUD, validation and error handling
-- 🔄 Phase 3 — JWT authentication (in progress)
+- ✅ Phase 3 — JWT authentication and Spring Security
 - ⏳ Phase 4 — Elasticsearch search
 - ⏳ Phase 5 — Observability
 - ⏳ Phase 6 — Docker and Azure deployment

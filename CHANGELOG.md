@@ -2,6 +2,29 @@
 
 ## [Unreleased]
 
+## 2026-05-05
+### Session 4 — Phase 3 JWT Authentication
+- Extracted Role enum as independent class (Role.java) from User entity
+- Created JwtService — JWT token generation and validation with jjwt 0.12.6
+- Created UserDetailsServiceImpl — loads user from DB by email for Spring Security
+- Created JwtAuthFilter — OncePerRequestFilter that validates Bearer token on every request
+- Created AuthService — register and login logic with BCrypt password encoding
+- Created AuthController — POST /api/v1/auth/register and POST /api/v1/auth/login
+- Updated SecurityConfig — stateless session, JWT filter, protected routes
+- Created GlobalExceptionHandler — handles BadCredentialsException (401), DuplicateResourceException (409), ResourceNotFoundException (404)
+- Fixed Lombok annotation processor in pom.xml — added annotationProcessorPaths and lombok.version property
+- Fixed UserResponse.java — updated Role import from User.Role to standalone Role
+- Fixed test isolation — AuthControllerTest and UserRepositoryTest now clean DB in @BeforeEach/@AfterEach
+- All 17 tests passing: 3 auth integration + 6 repository + 7 service unit + 1 application context
+
+### Blocked / time lost
+- ~30min resolving duplicate AuthService.java placed in wrong package (dto/auth/)
+- ~20min resolving Role enum conflict between nested User.Role and standalone Role.java
+- ~15min fixing Lombok not processing test classes — solved with annotationProcessorPaths in pom.xml
+- ~20min fixing test data pollution between AuthControllerTest and UserRepositoryTest — solved with deleteAll() in @BeforeEach
+
+### Phase 3 completed
+
 ## 2026-04-26
 ### Session 3 — 13:00 to 17:30 (4h 30min)
 - Cloned repository on laptop and verified environment works correctly
