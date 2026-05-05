@@ -1,3 +1,4 @@
+// src/main/java/com/inpusduat/inpusduat/dto/auth/AuthResponse.java
 package com.inpusduat.inpusduat.dto.auth;
 
 import lombok.Builder;

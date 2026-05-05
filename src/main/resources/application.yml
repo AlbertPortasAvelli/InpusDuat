@@ -42,3 +42,7 @@ management:
 
 server:
   port: 8080
+
+jwt:
+  secret: pQj68ijM6OQK91SqF7MWIj0HPXp5ml7/FRhG0qhQIrw=
+  expiration: 86400000  # 24 horas en ms

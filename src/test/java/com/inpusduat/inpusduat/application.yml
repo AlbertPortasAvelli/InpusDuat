@@ -15,3 +15,7 @@ spring:
 
   elasticsearch:
     uris: http://localhost:9200
+
+jwt:
+  secret: pQj68ijM6OQK91SqF7MWIj0HPXp5ml7/FRhG0qhQIrw=
+  expiration: 86400000

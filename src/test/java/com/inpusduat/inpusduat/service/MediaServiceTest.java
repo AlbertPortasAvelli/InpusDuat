@@ -1,6 +1,7 @@
 package com.inpusduat.inpusduat.service;
 
 import com.inpusduat.inpusduat.domain.Media;
+import com.inpusduat.inpusduat.domain.Role;
 import com.inpusduat.inpusduat.domain.User;
 import com.inpusduat.inpusduat.dto.media.MediaRequest;
 import com.inpusduat.inpusduat.dto.media.MediaResponse;
@@ -48,7 +49,7 @@ class MediaServiceTest {
                 .username("testuser")
                 .email("test@example.com")
                 .passwordHash("hash")
-                .role(User.Role.ADMIN)
+                .role(Role.ADMIN)
                 .active(true)
                 .build();
 

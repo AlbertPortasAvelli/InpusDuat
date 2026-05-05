@@ -63,8 +63,4 @@ public class User {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
-    public enum Role {
-        ADMIN, USER
-    }
 }
