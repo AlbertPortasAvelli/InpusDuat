@@ -1,6 +1,8 @@
 package com.inpusduat.inpusduat.repository;
 
+import com.inpusduat.inpusduat.domain.Role;
 import com.inpusduat.inpusduat.domain.User;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,18 +26,26 @@ class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    private User testUser;
-
     @BeforeEach
     void setUp() {
-        testUser = User.builder()
-                .username("testuser")
-                .email("test@example.com")
-                .passwordHash("hashedpassword")
-                .role(User.Role.USER)
-                .active(true)
-                .build();
+        userRepository.deleteAll();  // limpia antes de cada test
+        entityManager.flush();
+        entityManager.clear();
+
+        User testUser = new User();
+        testUser.setUsername("testuser");
+        testUser.setEmail("test@example.com");
+        testUser.setPasswordHash("hashedpassword");
+        testUser.setRole(Role.USER);
+        testUser.setActive(true);
         entityManager.persistAndFlush(testUser);
+    }
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAll();
+        entityManager.flush();
+        entityManager.clear();
     }
 
     @Test
