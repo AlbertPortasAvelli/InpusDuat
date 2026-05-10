@@ -3,6 +3,29 @@
 ## [Unreleased]
 
 ## 2026-05-10
+### Session 7 — Phase 6 Observability
+- Added logstash-logback-encoder dependency to pom.xml
+- Created logback-spring.xml — JSON structured logs for prod profile, human-readable for local
+- Created CorrelationIdFilter — generates UUID per request, stores in MDC as correlationId, adds X-Correlation-Id to response headers
+- Created filter/ package at com.inpusduat.inpusduat.filter
+- Added @Slf4j and structured log statements to AuthService — register, login, refresh with userId and email
+- Added @Slf4j and structured log statements to UserMediaService — add, update, remove with userId and mediaId
+- Exposed /actuator/health and /actuator/info as public endpoints in SecurityConfig
+- Added management.info.env.enabled and info.app block to application.yml
+- Created ElasticsearchHealthIndicator — custom health check via ElasticsearchOperations
+- Created health/ package at com.inpusduat.inpusduat.health
+- Created CorrelationIdFilterTest (3 unit tests — generates UUID, reuses incoming header, cleans MDC)
+- Created ActuatorEndpointTest (2 integration tests — health returns UP, info returns 200)
+- Total: 25/25 tests passing
+
+### Blocked / time lost
+- ~15min on IndexCoordinates import not resolving — switched to ElasticsearchOperations.getIndexCoordinatesFor()
+- ~10min on duplicate management: key in application.yml causing info endpoint to return {}
+- ~5min on wrong package path for health indicator (missing second inpusduat folder)
+
+### Phase 6 completed
+
+## 2026-05-10
 ### Session 6 — Phase 5 Improvements
 - Fixed hardcoded userId in MediaController — replaced with JWT principal via SecurityContextHolder
 - Created RefreshRequest DTO (dto/auth/RefreshRequest.java)

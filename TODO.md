@@ -36,7 +36,7 @@
 - [x] MediaService unit tests with Mockito (7 tests)
 - [x] Verify endpoints with Swagger UI
 
-## Phase 3 - Authentication and security [COMPLETED]
+## Phase 3 - Authentication and Security [COMPLETED]
 - [x] User registration with BCrypt password hashing
 - [x] Login returning JWT access token
 - [x] JWT filter to validate token on every request
@@ -61,14 +61,19 @@
 - [x] Login and register now return a real refresh token (was null)
 - [x] Revoked token cleanup — deleteByUserAndRevokedTrue() on every new token creation
 - [x] UserMedia endpoints — POST/GET/PUT/DELETE /api/v1/user-media
-- [x] Pagination on GET /api/v1/media (was already done), /media/search and /user-media
+- [x] Pagination on GET /api/v1/media/search and /user-media
 - [x] Total: 20/20 tests passing
 
-## Phase 6 - Observability [PENDING]
-- [ ] Logback with JSON format
-- [ ] MDC filter with correlationId
-- [ ] Meaningful logs on important operations
-- [ ] Verify health endpoint at /actuator/health
+## Phase 6 - Observability [COMPLETED]
+- [x] logback-spring.xml — JSON format for prod profile, human-readable for local
+- [x] CorrelationIdFilter — UUID per request stored in MDC, returned as X-Correlation-Id header
+- [x] Structured logs in AuthService — register, login, refresh with userId and email
+- [x] Structured logs in UserMediaService — add, update, remove with userId and mediaId
+- [x] /actuator/health public and returning UP with custom Elasticsearch health indicator
+- [x] /actuator/info public, returns app name, description and version
+- [x] CorrelationIdFilterTest (3 unit tests)
+- [x] ActuatorEndpointTest (2 integration tests)
+- [x] Total: 25/25 tests passing
 
 ## Phase 7 - Docker and Azure [PENDING]
 - [ ] Multi-stage Dockerfile
