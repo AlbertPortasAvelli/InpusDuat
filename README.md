@@ -27,10 +27,18 @@ docker-compose up -d
 ```
 
 ## Authentication
-Register and login via:
+Register, login and refresh via:
 POST /api/v1/auth/register
 POST /api/v1/auth/login
-Use the returned `accessToken` as `Bearer <token>` in the `Authorization` header for protected endpoints.
+POST /api/v1/auth/refresh  ← ADD
+Use the returned `accessToken` as `Bearer <token>` in the `Authorization` header.
+The `refreshToken` can be used to obtain a new access token without re-logging in.
+
+## User list
+POST   /api/v1/user-media           — add media to your list with status (WATCHED/WATCHING/PENDING)
+GET    /api/v1/user-media           — get your list (paginated)
+PUT    /api/v1/user-media/{mediaId} — update status or rating
+DELETE /api/v1/user-media/{mediaId} — remove from list
 
 ## Search
 GET /api/v1/media/search?q=cor&language=ca&type=SERIES&releaseYear=2000
@@ -42,9 +50,9 @@ All parameters are optional. Results are ranked by relevance.
 - ✅ Phase 2 — REST API with CRUD, validation and error handling
 - ✅ Phase 3 — JWT authentication and Spring Security
 - ✅ Phase 4 — Elasticsearch full-text search
-- ⏳ Phase 5 — Pending improvements (userId fix, refresh tokens, UserMedia)
+- ✅ Phase 5 — Refresh tokens, UserMedia endpoints, pagination   ← UPDATE
 - ⏳ Phase 6 — Observability
-- ⏳ Phase 7 — Docker and Azure deployment
+- ✅ Phase 7 — Docker and Azure deployment
 
 ## Test coverage
 20 tests passing: 3 auth integration · 6 repository · 7 service unit · 1 application context · 3 search integration

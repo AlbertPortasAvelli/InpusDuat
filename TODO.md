@@ -55,11 +55,14 @@
 - [x] Fixed test isolation — mediaRepository.deleteAll() before userRepository.deleteAll()
 - [x] Total: 20/20 tests passing
 
-## Phase 5 - Pending improvements [PENDING]
-- [ ] Fix hardcoded userId in MediaController — replace with JWT principal
-- [ ] Refresh token endpoint (currently returns null)
-- [ ] UserMedia endpoints (track watched/watching/pending status)
-- [ ] Pagination and sorting on search and media list
+## Phase 5 - Improvements [COMPLETED]
+- [x] Fix hardcoded userId in MediaController — replaced with JWT principal
+- [x] Refresh token endpoint — POST /api/v1/auth/refresh with token rotation
+- [x] Login and register now return a real refresh token (was null)
+- [x] Revoked token cleanup — deleteByUserAndRevokedTrue() on every new token creation
+- [x] UserMedia endpoints — POST/GET/PUT/DELETE /api/v1/user-media
+- [x] Pagination on GET /api/v1/media (was already done), /media/search and /user-media
+- [x] Total: 20/20 tests passing
 
 ## Phase 6 - Observability [PENDING]
 - [ ] Logback with JSON format
