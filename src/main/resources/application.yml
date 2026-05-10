@@ -41,6 +41,9 @@ management:
   endpoint:
     health:
       show-details: always
+  info:
+    env:
+      enabled: true
 
 server:
   port: 8080
@@ -48,3 +51,7 @@ server:
 jwt:
   secret: pQj68ijM6OQK91SqF7MWIj0HPXp5ml7/FRhG0qhQIrw=
   expiration: 86400000  # 24 horas en ms
+
+info:
+    env:
+      enabled: true

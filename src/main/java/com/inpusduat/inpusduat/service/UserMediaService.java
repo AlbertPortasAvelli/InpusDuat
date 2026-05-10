@@ -20,8 +20,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserMediaService {
@@ -55,7 +56,9 @@ public class UserMediaService {
             .watchedAt(request.getStatus() == UserMedia.Status.WATCHED ? LocalDateTime.now() : null)
             .build();
 
-        return toResponse(userMediaRepository.save(userMedia));
+        UserMediaResponse response = toResponse(userMediaRepository.save(userMedia));
+        log.info("UserMedia added: userId={}, mediaId={}, status={}", user.getId(), request.getMediaId(), request.getStatus());
+        return response;
     }
 
     public Page<UserMediaResponse> getMyList(Pageable pageable) {
@@ -78,13 +81,16 @@ public class UserMediaService {
         if (request.getRating() != null) userMedia.setRating(request.getRating());
         if (request.getNotes() != null) userMedia.setNotes(request.getNotes());
 
-        return toResponse(userMediaRepository.save(userMedia));
+        UserMediaResponse response = toResponse(userMediaRepository.save(userMedia));
+        log.info("UserMedia updated: userId={}, mediaId={}", user.getId(), mediaId);
+        return response;
     }
 
     public void removeMedia(Long mediaId) {
         User user = getCurrentUser();
         UserMedia userMedia = userMediaRepository.findByUserIdAndMediaId(user.getId(), mediaId)
             .orElseThrow(() -> new ResourceNotFoundException("Entry not found in your list"));
+        log.info("UserMedia removed: userId={}, mediaId={}", user.getId(), mediaId);
         userMediaRepository.delete(userMedia);
     }
 
