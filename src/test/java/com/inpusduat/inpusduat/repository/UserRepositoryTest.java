@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.inpusduat.inpusduat.repository.RefreshTokenRepository;
+
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,9 +25,12 @@ class UserRepositoryTest {
     @Autowired
     private MediaRepository mediaRepository;
 
+    @Autowired private RefreshTokenRepository refreshTokenRepository;
+
     @BeforeEach
     void setUp() {
         mediaRepository.deleteAll();
+        refreshTokenRepository.deleteAll();
         userRepository.deleteAll();
         
 
@@ -41,6 +46,7 @@ class UserRepositoryTest {
     @AfterEach
     void tearDown() {
         mediaRepository.deleteAll();
+        refreshTokenRepository.deleteAll();
         userRepository.deleteAll();
     }
 

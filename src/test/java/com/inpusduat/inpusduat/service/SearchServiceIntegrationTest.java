@@ -1,4 +1,3 @@
-// src/test/java/com/inpusduat/inpusduat/service/SearchServiceIntegrationTest.java
 package com.inpusduat.inpusduat.service;
 
 import com.inpusduat.inpusduat.dto.media.MediaSearchResponse;
@@ -8,8 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +23,6 @@ class SearchServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // Index a sample document
         Media media = new Media();
         media.setId(999L);
         media.setTitle("El cor de la ciutat");
@@ -38,20 +36,20 @@ class SearchServiceIntegrationTest {
 
     @Test
     void searchByQuery_returnsResults() {
-        List<MediaSearchResponse> results = searchService.search("cor", null, null, null);
-        assertThat(results).isNotEmpty();
-        assertThat(results.get(0).getTitle()).contains("cor");
+        Page<MediaSearchResponse> results = searchService.search("cor", null, null, null, PageRequest.of(0, 20));
+        assertThat(results.getContent()).isNotEmpty();
+        assertThat(results.getContent().get(0).getTitle()).contains("cor");
     }
 
     @Test
     void searchByLanguage_filtersCorrectly() {
-        List<MediaSearchResponse> results = searchService.search(null, null, "ca", null);
-        assertThat(results).allMatch(r -> "ca".equals(r.getLanguage()));
+        Page<MediaSearchResponse> results = searchService.search(null, null, "ca", null, PageRequest.of(0, 20));
+        assertThat(results.getContent()).allMatch(r -> "ca".equals(r.getLanguage()));
     }
 
     @Test
     void searchByType_filtersCorrectly() {
-        List<MediaSearchResponse> results = searchService.search(null, "SERIES", null, null);
-        results.forEach(r -> assertThat(r.getType()).isEqualTo("SERIES"));
+        Page<MediaSearchResponse> results = searchService.search(null, "SERIES", null, null, PageRequest.of(0, 20));
+        results.getContent().forEach(r -> assertThat(r.getType()).isEqualTo("SERIES"));
     }
 }

@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 @Service
@@ -21,7 +25,7 @@ public class SearchService {
 
     private final ElasticsearchOperations elasticsearchOperations;
 
-    public List<MediaSearchResponse> search(String q, String type, String language, Integer releaseYear) {
+    public Page<MediaSearchResponse> search(String q, String type, String language, Integer releaseYear, Pageable pageable) {
 
         BoolQuery.Builder boolQuery = new BoolQuery.Builder();
 
@@ -47,16 +51,18 @@ public class SearchService {
         }
 
         NativeQuery query = NativeQuery.builder()
-                .withQuery(Query.of(q2 -> q2.bool(boolQuery.build())))
-                .withMaxResults(50)
-                .build();
+            .withQuery(Query.of(q2 -> q2.bool(boolQuery.build())))
+            .withPageable(pageable)           
+            .build();
 
         SearchHits<MediaDocument> hits = elasticsearchOperations.search(query, MediaDocument.class);
 
-        return hits.getSearchHits().stream()
-                .map(SearchHit::getContent)
-                .map(this::toResponse)
-                .toList();
+        List<MediaSearchResponse> results = hits.getSearchHits().stream()
+            .map(SearchHit::getContent)
+            .map(this::toResponse)
+            .toList();
+
+        return new PageImpl<>(results, pageable, hits.getTotalHits());
     }
 
     private MediaSearchResponse toResponse(MediaDocument doc) {
