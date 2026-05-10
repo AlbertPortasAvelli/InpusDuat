@@ -3,6 +3,34 @@
 ## [Unreleased]
 
 ## 2026-05-10
+### Session 6 — Phase 5 Improvements
+- Fixed hardcoded userId in MediaController — replaced with JWT principal via SecurityContextHolder
+- Created RefreshRequest DTO (dto/auth/RefreshRequest.java)
+- Implemented refresh token persistence — login and register now save and return a real refresh token
+- Implemented token rotation in refresh() — revokes old token before issuing new one
+- Added deleteByUserAndRevokedTrue() to RefreshTokenRepository — cleans up revoked tokens automatically
+- Added POST /api/v1/auth/refresh endpoint to AuthController
+- Created UserMediaRequest, UserMediaUpdateRequest, UserMediaResponse DTOs (dto/usermedia/)
+- Added findByUserId(Long) to UserMediaRepository (simple List version alongside existing Page version)
+- Created UserMediaService — add, list, update, remove with JWT principal resolution
+- Created UserMediaController — POST/GET/PUT/DELETE /api/v1/user-media
+- Added pagination to GET /api/v1/media/search — SearchService now returns Page<> with Pageable
+- Added pagination to GET /api/v1/user-media — UserMediaService and UserMediaController use Pageable
+- GET /api/v1/media and MediaService.findAll() were already paginated (no change needed)
+- Fixed test isolation — AuthControllerTest and UserRepositoryTest now delete refreshTokenRepository before userRepository in @BeforeEach/@AfterEach
+- Updated SearchServiceIntegrationTest — search() now takes Pageable, returns Page<>, assertions use .getContent()
+- All 20 tests passing
+
+### Blocked / time lost
+- ~10min on LocalTime vs LocalDateTime confusion in AuthService (wrong import)
+- ~10min on Instant vs LocalDateTime mismatch between AuthService and RefreshToken entity
+- ~10min on FK violation in tests — refresh_tokens references users, fixed by adding refreshTokenRepository.deleteAll() before userRepository.deleteAll()
+- ~5min on missing RefreshRequest.java file causing compilation error
+
+### Phase 5 completed
+
+
+## 2026-05-10
 ### Session 5 — Phase 4 Elasticsearch Search
 - Created MediaDocument — Elasticsearch document mapping with @Document(indexName = "media")
 - Created MediaSearchRepository — extends ElasticsearchRepository

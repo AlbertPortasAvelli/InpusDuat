@@ -9,7 +9,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +18,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.inpusduat.inpusduat.service.SearchService;
 import com.inpusduat.inpusduat.dto.media.MediaSearchResponse;
+import com.inpusduat.inpusduat.exception.UnauthorizedException;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.inpusduat.inpusduat.repository.UserRepository;
+import com.inpusduat.inpusduat.domain.User;
 
 @RestController
 @RequestMapping("/api/v1/media")
@@ -29,6 +33,7 @@ public class MediaController {
 
     private final MediaService mediaService;
     private final SearchService searchService;
+    private final UserRepository userRepository;
 
 
     @GetMapping
@@ -48,10 +53,11 @@ public class MediaController {
     @Operation(summary = "Create a new media entry — ADMIN only")
     public ResponseEntity<MediaResponse> create(
             @Valid @RequestBody MediaRequest request) {
-        // TODO: obtener userId del token JWT cuando implementemos seguridad
-        Long userId = 13L;
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(mediaService.create(request, userId));
+       String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new UnauthorizedException("User not found"));
+        MediaResponse response = mediaService.create(request, user.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
@@ -69,13 +75,14 @@ public class MediaController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<MediaSearchResponse>> search(
+   @GetMapping("/search")
+    public ResponseEntity<Page<MediaSearchResponse>> search(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String language,
-            @RequestParam(required = false) Integer releaseYear) {
+            @RequestParam(required = false) Integer releaseYear,
+            @PageableDefault(size = 20) Pageable pageable) {   // ← add this
 
-        return ResponseEntity.ok(searchService.search(q, type, language, releaseYear));
+        return ResponseEntity.ok(searchService.search(q, type, language, releaseYear, pageable)); // ← pass pageable
     }
 }

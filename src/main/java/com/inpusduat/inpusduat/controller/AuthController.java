@@ -3,6 +3,7 @@ package com.inpusduat.inpusduat.controller;
 import com.inpusduat.inpusduat.dto.auth.AuthResponse;
 import com.inpusduat.inpusduat.dto.auth.LoginRequest;
 import com.inpusduat.inpusduat.dto.auth.RegisterRequest;
+import com.inpusduat.inpusduat.dto.auth.RefreshRequest;
 import com.inpusduat.inpusduat.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,5 +25,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request) {
+        return ResponseEntity.ok(authService.refresh(request));
     }
 }

@@ -1,11 +1,15 @@
 package com.inpusduat.inpusduat.service;
 
+import com.inpusduat.inpusduat.domain.RefreshToken;
 import com.inpusduat.inpusduat.domain.Role;
 import com.inpusduat.inpusduat.domain.User;
 import com.inpusduat.inpusduat.dto.auth.AuthResponse;
 import com.inpusduat.inpusduat.dto.auth.LoginRequest;
+import com.inpusduat.inpusduat.dto.auth.RefreshRequest;
 import com.inpusduat.inpusduat.dto.auth.RegisterRequest;
 import com.inpusduat.inpusduat.exception.DuplicateResourceException;
+import com.inpusduat.inpusduat.exception.UnauthorizedException;
+import com.inpusduat.inpusduat.repository.RefreshTokenRepository;
 import com.inpusduat.inpusduat.repository.UserRepository;
 import com.inpusduat.inpusduat.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +21,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -26,9 +33,13 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final RefreshTokenRepository refreshTokenRepository; // NEW
 
     @Value("${jwt.expiration}")
     private long jwtExpiration;
+
+    // NEW — 7 days in seconds
+    private static final long REFRESH_TOKEN_VALIDITY_SECONDS = 604800;
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -49,11 +60,12 @@ public class AuthService {
         userRepository.save(user);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-        String token = jwtService.generateToken(userDetails);
+        String accessToken = jwtService.generateToken(userDetails);
+        RefreshToken refreshToken = createAndSaveRefreshToken(user); // NEW
 
         return AuthResponse.builder()
-                .accessToken(token)
-                .refreshToken(null)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.getToken()) // NEW — was null
                 .tokenType("Bearer")
                 .expiresIn(jwtExpiration / 1000)
                 .build();
@@ -67,13 +79,57 @@ public class AuthService {
                 )
         );
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
-        String token = jwtService.generateToken(userDetails);
+        String accessToken = jwtService.generateToken(userDetails);
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UnauthorizedException("User not found")); // NEW
+        RefreshToken refreshToken = createAndSaveRefreshToken(user);             // NEW
 
         return AuthResponse.builder()
-                .accessToken(token)
-                .refreshToken(null)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.getToken()) // NEW — was null
                 .tokenType("Bearer")
                 .expiresIn(jwtExpiration / 1000)
                 .build();
+    }
+
+    // NEW — full method
+    public AuthResponse refresh(RefreshRequest request) {
+    RefreshToken stored = refreshTokenRepository.findByToken(request.getRefreshToken())
+            .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
+
+    if (Boolean.TRUE.equals(stored.getRevoked())) {          // ← was stored.isRevoked()
+        throw new UnauthorizedException("Refresh token has been revoked");
+    }
+    if (stored.isExpired()) {                                 // ← was isBefore(LocalTime.now())
+        throw new UnauthorizedException("Refresh token has expired");
+    }
+
+    stored.setRevoked(true);
+    refreshTokenRepository.save(stored);
+
+    User user = stored.getUser();
+    UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+    String newAccessToken = jwtService.generateToken(userDetails);
+    RefreshToken newRefreshToken = createAndSaveRefreshToken(user);
+
+    return AuthResponse.builder()
+            .accessToken(newAccessToken)
+            .refreshToken(newRefreshToken.getToken())
+            .tokenType("Bearer")
+            .expiresIn(jwtExpiration / 1000)
+            .build();
+    }
+
+    // NEW — shared helper used by register, login, and refresh
+    private RefreshToken createAndSaveRefreshToken(User user) {
+        refreshTokenRepository.deleteByUserAndRevokedTrue(user);
+        RefreshToken token = RefreshToken.builder()
+                .user(user)
+                .token(UUID.randomUUID().toString())
+                .expiresAt(LocalDateTime.now().plusSeconds(REFRESH_TOKEN_VALIDITY_SECONDS)) // ← was LocalTime
+                .revoked(false)
+                .build();
+        return refreshTokenRepository.save(token);
     }
 }
