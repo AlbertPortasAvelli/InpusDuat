@@ -19,3 +19,25 @@ spring:
 jwt:
   secret: pQj68ijM6OQK91SqF7MWIj0HPXp5ml7/FRhG0qhQIrw=
   expiration: 86400000
+
+elasticsearch:
+  image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+  env:
+    discovery.type: single-node
+    xpack.security.enabled: "false"
+  ports:
+    - 9200:9200
+  options: >-
+    --health-cmd "curl -f http://localhost:9200/_cluster/health"
+    --health-interval 10s
+    --health-timeout 5s
+    --health-retries 10
+
+    
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
+    url: /v3/api-docs
+  api-docs:
+    path: /v3/api-docs
