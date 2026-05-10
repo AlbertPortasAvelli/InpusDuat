@@ -41,3 +41,21 @@ springdoc:
     url: /v3/api-docs
   api-docs:
     path: /v3/api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: Inpu's Duat
+    description: Personal lost-media rescue platform for Catalan content
+    version: 0.6.0

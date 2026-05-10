@@ -23,7 +23,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -57,7 +59,9 @@ public class AuthService {
                 .active(true)
                 .build();
 
-        userRepository.save(user);
+        User saved = userRepository.save(user);
+        log.info("User registered: userId={}, email={}", saved.getId(), saved.getEmail());
+        
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String accessToken = jwtService.generateToken(userDetails);
@@ -82,8 +86,9 @@ public class AuthService {
         String accessToken = jwtService.generateToken(userDetails);
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UnauthorizedException("User not found")); // NEW
-        RefreshToken refreshToken = createAndSaveRefreshToken(user);             // NEW
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+        log.info("User logged in: userId={}, email={}", user.getId(), user.getEmail()); 
+        RefreshToken refreshToken = createAndSaveRefreshToken(user);            
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
@@ -109,6 +114,7 @@ public class AuthService {
     refreshTokenRepository.save(stored);
 
     User user = stored.getUser();
+    log.info("Token refreshed: userId={}", user.getId());
     UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
     String newAccessToken = jwtService.generateToken(userDetails);
     RefreshToken newRefreshToken = createAndSaveRefreshToken(user);
