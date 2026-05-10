@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.inpusduat.inpusduat.search.ElasticsearchIndexService;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,8 @@ public class MediaService {
 
     private final MediaRepository mediaRepository;
     private final UserRepository userRepository;
+    private final ElasticsearchIndexService elasticsearchIndexService;
+
 
     @Transactional(readOnly = true)
     public Page<MediaResponse> findAll(Pageable pageable) {
@@ -56,6 +59,7 @@ public class MediaService {
                 .build();
 
         Media saved = mediaRepository.save(media);
+        elasticsearchIndexService.indexMedia(media);
         log.info("Media created successfully with id: {}", saved.getId());
         return toResponse(saved);
     }
@@ -76,6 +80,7 @@ public class MediaService {
         media.setPosterUrl(request.getPosterUrl());
 
         Media saved = mediaRepository.save(media);
+        elasticsearchIndexService.indexMedia(media);
         log.info("Media updated successfully with id: {}", saved.getId());
         return toResponse(saved);
     }
@@ -86,6 +91,7 @@ public class MediaService {
         if (!mediaRepository.existsById(id)) {
             throw new ResourceNotFoundException("Media", id);
         }
+        elasticsearchIndexService.deleteMedia(id);
         mediaRepository.deleteById(id);
         log.info("Media deleted successfully with id: {}", id);
     }

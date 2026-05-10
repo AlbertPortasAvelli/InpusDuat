@@ -8,6 +8,8 @@ import com.inpusduat.inpusduat.dto.media.MediaResponse;
 import com.inpusduat.inpusduat.exception.ResourceNotFoundException;
 import com.inpusduat.inpusduat.repository.MediaRepository;
 import com.inpusduat.inpusduat.repository.UserRepository;
+import com.inpusduat.inpusduat.search.ElasticsearchIndexService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +33,9 @@ class MediaServiceTest {
 
     @Mock
     private MediaRepository mediaRepository;
+
+    @Mock
+    private ElasticsearchIndexService elasticsearchIndexService;
 
     @Mock
     private UserRepository userRepository;

@@ -20,12 +20,7 @@
 - [x] V5__create_refresh_tokens.sql
 - [x] V6__create_indexes.sql
 - [x] Verify all 6 migrations apply successfully
-- [x] JPA Entity: User
-- [x] JPA Entity: Media
-- [x] JPA Entity: Season
-- [x] JPA Entity: Episode
-- [x] JPA Entity: UserMedia
-- [x] JPA Entity: RefreshToken
+- [x] JPA Entity: User, Media, Season, Episode, UserMedia, RefreshToken
 - [x] Verify application starts with ddl-auto: validate
 
 ## Phase 2 - REST API [COMPLETED] [4h 30min]
@@ -41,29 +36,38 @@
 - [x] MediaService unit tests with Mockito (7 tests)
 - [x] Verify endpoints with Swagger UI
 
-## Phase 3 - Authentication and security [PENDING]
-- [ ] User registration with BCrypt password hashing
-- [ ] Login returning JWT access token and refresh token
-- [ ] JWT filter to validate token on every request
-- [ ] Spring Security with real protected routes (remove temporary permitAll)
-- [ ] Refresh token endpoint
-- [ ] ADMIN and USER roles
-- [ ] Authentication integration tests
+## Phase 3 - Authentication and security [COMPLETED]
+- [x] User registration with BCrypt password hashing
+- [x] Login returning JWT access token
+- [x] JWT filter to validate token on every request
+- [x] Spring Security with real protected routes
+- [x] ADMIN and USER roles
+- [x] Authentication integration tests (3 tests)
 
-## Phase 4 - Elasticsearch [PENDING]
-- [ ] MediaDocument for Elasticsearch indexing
-- [ ] Automatic indexing on media create and update
-- [ ] Full-text search on title and synopsis
-- [ ] Filters by genre, language, year and type
-- [ ] GET /api/v1/media/search endpoint
+## Phase 4 - Elasticsearch [COMPLETED]
+- [x] MediaDocument for Elasticsearch indexing
+- [x] MediaSearchRepository extending ElasticsearchRepository
+- [x] ElasticsearchIndexService — automatic indexing on media create and delete
+- [x] SearchService — full-text search with filters (type, language, releaseYear)
+- [x] GET /api/v1/media/search endpoint
+- [x] Elasticsearch service added to GitHub Actions CI
+- [x] SearchServiceIntegrationTest (3 tests)
+- [x] Fixed test isolation — mediaRepository.deleteAll() before userRepository.deleteAll()
+- [x] Total: 20/20 tests passing
 
-## Phase 5 - Observability [PENDING]
+## Phase 5 - Pending improvements [PENDING]
+- [ ] Fix hardcoded userId in MediaController — replace with JWT principal
+- [ ] Refresh token endpoint (currently returns null)
+- [ ] UserMedia endpoints (track watched/watching/pending status)
+- [ ] Pagination and sorting on search and media list
+
+## Phase 6 - Observability [PENDING]
 - [ ] Logback with JSON format
 - [ ] MDC filter with correlationId
 - [ ] Meaningful logs on important operations
 - [ ] Verify health endpoint at /actuator/health
 
-## Phase 6 - Docker and Azure [PENDING]
+## Phase 7 - Docker and Azure [PENDING]
 - [ ] Multi-stage Dockerfile
 - [ ] Verify docker-compose up starts everything correctly
 - [ ] Create Azure account

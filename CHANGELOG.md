@@ -2,6 +2,29 @@
 
 ## [Unreleased]
 
+## 2026-05-10
+### Session 5 — Phase 4 Elasticsearch Search
+- Created MediaDocument — Elasticsearch document mapping with @Document(indexName = "media")
+- Created MediaSearchRepository — extends ElasticsearchRepository
+- Created ElasticsearchIndexService — indexes media on create, updates on edit, deletes on remove
+- Created SearchService — full-text search using NativeQuery with BoolQuery (multiMatch on title^3, originalTitle^2, synopsis) and keyword filters (type, language, releaseYear)
+- Created MediaSearchResponse DTO
+- Added GET /api/v1/media/search endpoint to MediaController
+- Updated MediaService — calls ElasticsearchIndexService on create and delete
+- Added Elasticsearch service to GitHub Actions CI workflow
+- Created SearchServiceIntegrationTest (3 integration tests)
+- Fixed MediaServiceTest — added @Mock for ElasticsearchIndexService
+- Fixed test isolation — AuthControllerTest and UserRepositoryTest now delete media before users in @BeforeEach/@AfterEach to respect FK constraint
+- Fixed duplicate springdoc key in application.yml
+- All 20 tests passing: 3 auth + 6 repository + 7 service unit + 1 application context + 3 search integration
+
+### Blocked / time lost
+- ~15min on duplicate springdoc key in application.yml causing startup failure
+- ~20min on FK constraint violation in tests — resolved by deleting media before users in cleanup
+- ~10min on MediaServiceTest NullPointer — resolved by adding @Mock for ElasticsearchIndexService
+
+### Phase 4 completed
+
 ## 2026-05-05
 ### Session 4 — Phase 3 JWT Authentication
 - Extracted Role enum as independent class (Role.java) from User entity
@@ -21,7 +44,7 @@
 - ~30min resolving duplicate AuthService.java placed in wrong package (dto/auth/)
 - ~20min resolving Role enum conflict between nested User.Role and standalone Role.java
 - ~15min fixing Lombok not processing test classes — solved with annotationProcessorPaths in pom.xml
-- ~20min fixing test data pollution between AuthControllerTest and UserRepositoryTest — solved with deleteAll() in @BeforeEach
+- ~20min fixing test data pollution between AuthControllerTest and UserRepositoryTest
 
 ### Phase 3 completed
 
@@ -41,11 +64,11 @@
 - Configured SpringDoc OpenAPI — Swagger UI accessible at /swagger-ui.html
 - Added UserRepository tests (6 tests passing with PostgreSQL)
 - Added MediaService unit tests with Mockito (7 tests passing)
-- Verified full API flow via Swagger UI: POST, GET, 404 error handling
+- Verified full API flow via Swagger UI
 - GitHub Actions passing on every push
 
 ### Blocked / time lost
-- ~20min on @DataJpaTest trying to replace PostgreSQL with H2 — fixed with @AutoConfigureTestDatabase(replace = NONE)
+- ~20min on @DataJpaTest trying to replace PostgreSQL with H2
 - ~15min on port conflict between local PostgreSQL and Docker on laptop
 
 ### Phase 2 completed — total time: ~4h 30min
@@ -55,19 +78,16 @@
 - Project setup with Spring Initializr (Spring Boot 3.4.1, Java 17)
 - VS Code configuration with Extension Pack for Java
 - Data model design: 6 tables defined and documented
-- Created README.md, ARCHITECTURE.md, DATA_MODEL.md, api-contract.yaml,
-  CHANGELOG.md and TODO.md
+- Created README.md, ARCHITECTURE.md, DATA_MODEL.md, api-contract.yaml, CHANGELOG.md and TODO.md
 - Installed Docker Desktop
 - Created GitHub repository with main and develop branches
 - Git flow setup: protected main branch, develop as default
-- Fixed pom.xml: downgraded from Spring Boot 4.0.5 to 3.4.1,
-  removed non-existent test dependencies, added JWT and Elasticsearch
+- Fixed pom.xml: downgraded from Spring Boot 4.0.5 to 3.4.1, removed non-existent test dependencies, added JWT and Elasticsearch
 - Configured JAVA_HOME for Eclipse Adoptium JDK 17
 - Resolved port conflict between local PostgreSQL (5432) and Docker (5433)
 - docker-compose.yml with PostgreSQL 15 and Elasticsearch 8.12
 - application.yml with datasource, JPA, Flyway and Elasticsearch config
-- Created 6 Flyway migrations: users, media, seasons, episodes,
-  user_media, refresh_tokens and indexes
+- Created 6 Flyway migrations: users, media, seasons, episodes, user_media, refresh_tokens and indexes
 - Successfully applied all 6 migrations — application started on port 8080
 
 ### Blocked / time lost

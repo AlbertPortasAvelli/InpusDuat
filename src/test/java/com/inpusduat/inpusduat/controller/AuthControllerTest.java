@@ -1,7 +1,10 @@
 package com.inpusduat.inpusduat.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.inpusduat.inpusduat.repository.MediaRepository;
 import com.inpusduat.inpusduat.repository.UserRepository;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +27,17 @@ class AuthControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
     @Autowired UserRepository userRepository;
+    @Autowired private MediaRepository mediaRepository;
 
     @BeforeEach
     void setUp() {
+        mediaRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown() {
+        mediaRepository.deleteAll();
         userRepository.deleteAll();
     }
 

@@ -20,9 +20,14 @@ class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private MediaRepository mediaRepository;
+
     @BeforeEach
     void setUp() {
+        mediaRepository.deleteAll();
         userRepository.deleteAll();
+        
 
         User testUser = new User();
         testUser.setUsername("testuser");
@@ -35,6 +40,7 @@ class UserRepositoryTest {
 
     @AfterEach
     void tearDown() {
+        mediaRepository.deleteAll();
         userRepository.deleteAll();
     }
 
